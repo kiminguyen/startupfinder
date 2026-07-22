@@ -88,12 +88,12 @@ export default function Home() {
 
             <div className="relative z-10">
               <h1 className="mt-7 max-w-2xl text-4xl font-light leading-[1.1] tracking-tight text-stone-900 sm:text-5xl">
-                Find YC &amp; a16z startups to pitch yourself to
+                Find the startup that's right for you.
               </h1>
               <p className="mt-4 max-w-xl text-sm leading-relaxed text-stone-800/80">
                 Search by role, skill, and industry across startups backed by Y
-                Combinator, a16z, Union Square Ventures, and Bessemer — then
-                reach out directly.
+                Combinator and more, then reach out directly.
+
               </p>
             </div>
           </div>
