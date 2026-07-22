@@ -1,5 +1,6 @@
 import { BACKERS } from "@/lib/backers";
 import type { Startup } from "@/lib/types";
+import { Tooltip } from "./Tooltip";
 
 function BackerBadge({ label, className }: { label: string; className: string }) {
   return (
@@ -70,7 +71,9 @@ export function StartupCard({
             <h3 className="truncate font-medium text-stone-900">{startup.name}</h3>
             <div className="mt-1.5 flex flex-wrap gap-1.5">
               {BACKERS.filter((b) => startup.backers.includes(b.id)).map((b) => (
-                <BackerBadge key={b.id} label={b.short} className={b.badgeClass} />
+                <Tooltip key={b.id} text={b.blurb}>
+                  <BackerBadge label={b.short} className={b.badgeClass} />
+                </Tooltip>
               ))}
               {startup.isHiring && (
                 <BackerBadge
