@@ -106,3 +106,68 @@ body {
     animation: none;
   }
 }
+
+/* Glowing sparkle cursor */
+.sparkle-active,
+.sparkle-active * {
+  cursor: none !important;
+}
+
+.sparkle-star {
+  display: block;
+  filter: drop-shadow(0 0 3px rgba(246, 162, 86, 0.95))
+    drop-shadow(0 0 7px rgba(245, 193, 90, 0.7));
+  animation: sparkle-twinkle 1.6s ease-in-out infinite;
+}
+
+.sparkle-aura {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  height: 34px;
+  width: 34px;
+  border-radius: 9999px;
+  background: radial-gradient(
+    circle,
+    rgba(245, 193, 90, 0.55) 0%,
+    rgba(246, 162, 86, 0.28) 40%,
+    transparent 70%
+  );
+  filter: blur(2px);
+  animation: sparkle-glow 1.6s ease-in-out infinite;
+}
+
+.sparkle-cursor.sparkle-click .sparkle-star {
+  animation-duration: 0.5s;
+}
+
+@keyframes sparkle-twinkle {
+  0%,
+  100% {
+    transform: rotate(0deg) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: rotate(40deg) scale(0.8);
+    opacity: 0.9;
+  }
+}
+
+@keyframes sparkle-glow {
+  0%,
+  100% {
+    opacity: 0.65;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.3);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sparkle-star,
+  .sparkle-aura {
+    animation: none;
+  }
+}
