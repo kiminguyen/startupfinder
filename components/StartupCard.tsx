@@ -26,11 +26,12 @@ function titleCase(s: string): string {
   return s.replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-function jobsSearchUrl(name: string, roleQuery: string): string {
-  const keywords = [name, roleQuery].filter(Boolean).join(" ");
-  return `https://www.linkedin.com/jobs/search/?keywords=${encodeURIComponent(
-    keywords
-  )}`;
+// We don't store each company's exact careers URL (they vary wildly — own
+// domain, subdomain, or an ATS like Greenhouse/Lever). A scoped Google search
+// reliably lands on the company's own careers/jobs page as the top result.
+function careersSearchUrl(name: string, roleQuery: string): string {
+  const query = [name, "careers", roleQuery].filter(Boolean).join(" ");
+  return `https://www.google.com/search?q=${encodeURIComponent(query)}`;
 }
 
 export function StartupCard({
@@ -114,7 +115,7 @@ export function StartupCard({
 
         {showJobsLink && startup.isHiring && (
           <a
-            href={jobsSearchUrl(startup.name, roleQuery)}
+            href={careersSearchUrl(startup.name, roleQuery)}
             target="_blank"
             rel="noopener noreferrer"
             className="mt-4 inline-flex items-center gap-1.5 self-start rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-700 transition hover:bg-emerald-100"
