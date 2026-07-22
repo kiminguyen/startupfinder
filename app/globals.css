@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #ece8e0;
+  --foreground: #1c1a17;
 }
 
 @theme inline {
@@ -12,15 +12,97 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Sunset gradient — periwinkle → lavender → peach → warm orange */
+.sunset-sky {
+  background: linear-gradient(
+    180deg,
+    #9fb0d6 0%,
+    #b3b0d0 20%,
+    #d3c0c4 40%,
+    #f0c39c 60%,
+    #f6a256 82%,
+    #f8c07d 100%
+  );
+}
+
+/* Warm-to-cool meter fill, echoing the mockup's thermometer accents */
+.meter-fill {
+  background: linear-gradient(90deg, #f6a256 0%, #f2c27f 45%, #c7cdea 100%);
+}
+
+/* Glowing text fields — warm sunset halo on hover / focus / open */
+.glow-field {
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.glow-field:hover {
+  border-color: rgba(246, 162, 86, 0.5);
+  box-shadow: 0 0 0 1px rgba(246, 162, 86, 0.25),
+    0 0 18px -2px rgba(246, 162, 86, 0.4);
+}
+.glow-field:focus-within,
+.glow-field[data-open="true"] {
+  border-color: rgba(246, 162, 86, 0.75);
+  box-shadow: 0 0 0 2px rgba(246, 162, 86, 0.25),
+    0 0 26px -2px rgba(246, 162, 86, 0.55);
+}
+
+/* Glowing submit button */
+.glow-btn {
+  transition: transform 0.25s ease, box-shadow 0.3s ease, filter 0.3s ease;
+}
+.glow-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+  box-shadow: 0 10px 26px -8px rgba(246, 162, 86, 0.7),
+    0 0 22px -2px rgba(245, 193, 90, 0.6);
+}
+.glow-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+/* Floating / rotating decorative shapes */
+@keyframes float-a {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-18px);
+  }
+}
+@keyframes float-b {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(16px);
+  }
+}
+@keyframes spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.animate-float-a {
+  animation: float-a 9s ease-in-out infinite;
+}
+.animate-float-b {
+  animation: float-b 12s ease-in-out infinite;
+}
+.animate-spin-slow {
+  animation: spin-slow 40s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-float-a,
+  .animate-float-b,
+  .animate-spin-slow {
+    animation: none;
+  }
 }
