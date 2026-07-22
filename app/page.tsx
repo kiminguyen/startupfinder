@@ -24,9 +24,20 @@ export default function Home() {
   const [today, setToday] = useState("");
   const [hiringActive, setHiringActive] = useState(false);
   const [roleQuery, setRoleQuery] = useState("");
+  const [featured, setFeatured] = useState<Startup[]>([]);
 
   useEffect(() => {
     setToday(new Date().toLocaleDateString("en-US"));
+  }, []);
+
+  // A fresh random sample for the pre-search landing state (new picks each load).
+  useEffect(() => {
+    fetch("/api/startups?sample=9", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (d?.results) setFeatured(d.results);
+      })
+      .catch(() => {});
   }, []);
 
   const handleSearch = useCallback(async (filters: SearchFilters) => {
@@ -121,6 +132,7 @@ export default function Home() {
             searched={searched}
             hiringActive={hiringActive}
             roleQuery={roleQuery}
+            featured={featured}
           />
         </div>
       </div>

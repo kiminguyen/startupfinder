@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 interface TooltipState {
   x: number;
@@ -47,17 +48,22 @@ export function Tooltip({
       className="inline-flex outline-none"
     >
       {children}
-      {pos && (
-        <span
-          role="tooltip"
-          className={`pointer-events-none fixed z-[9998] w-[230px] -translate-x-1/2 rounded-lg bg-stone-900/95 px-3 py-2 text-[11px] leading-snug text-stone-100 shadow-xl backdrop-blur ${
-            pos.below ? "" : "-translate-y-full"
-          }`}
-          style={{ left: pos.x, top: pos.y }}
-        >
-          {text}
-        </span>
-      )}
+      {/* Portal to <body> so the card's overflow / backdrop-filter can't clip
+          or mis-position the fixed tooltip. */}
+      {pos &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <span
+            role="tooltip"
+            className={`pointer-events-none fixed z-[9998] w-[230px] -translate-x-1/2 rounded-lg bg-stone-900/95 px-3 py-2 text-[11px] leading-snug text-stone-100 shadow-xl backdrop-blur ${
+              pos.below ? "" : "-translate-y-full"
+            }`}
+            style={{ left: pos.x, top: pos.y }}
+          >
+            {text}
+          </span>,
+          document.body
+        )}
     </span>
   );
 }

@@ -4,6 +4,7 @@ import { BACKERS, BACKER_IDS } from "@/lib/backers";
 import type { Backer, Facets, SearchFilters, Startup } from "@/lib/types";
 import { useCallback, useEffect, useState } from "react";
 import { Dropdown } from "./Dropdown";
+import { Tooltip } from "./Tooltip";
 import { ResumeUpload } from "./ResumeUpload";
 import { StartupCard } from "./StartupCard";
 
@@ -121,12 +122,13 @@ export function SearchForm({ onSearch, loading }: SearchFormProps) {
 
       <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
         {BACKERS.map((b) => (
-          <Checkbox
-            key={b.id}
-            label={b.label}
-            checked={backers.includes(b.id)}
-            onChange={(checked) => toggleBacker(b.id, checked)}
-          />
+          <Tooltip key={b.id} text={b.blurb}>
+            <Checkbox
+              label={b.label}
+              checked={backers.includes(b.id)}
+              onChange={(checked) => toggleBacker(b.id, checked)}
+            />
+          </Tooltip>
         ))}
         <span className="mx-1 hidden h-4 w-px bg-stone-300 sm:block" />
         <Checkbox
@@ -176,6 +178,7 @@ interface ResultsProps {
   searched: boolean;
   hiringActive: boolean;
   roleQuery: string;
+  featured: Startup[];
 }
 
 export function Results({
@@ -185,6 +188,7 @@ export function Results({
   searched,
   hiringActive,
   roleQuery,
+  featured,
 }: ResultsProps) {
   if (loading) {
     return (
@@ -196,12 +200,24 @@ export function Results({
 
   if (!searched) {
     return (
-      <div className="rounded-[28px] border border-dashed border-stone-300 bg-white/40 px-6 py-14 text-center">
-        <p className="text-stone-500">
-          Enter your interests above and hit{" "}
-          <span className="font-medium text-stone-700">Find startups</span> to
-          discover companies from YC, a16z, USV, and Bessemer to reach out to.
+      <div className="space-y-4">
+        <p className="font-mono text-[11px] uppercase tracking-[0.15em] text-stone-500">
+          A few to explore · reload for more
         </p>
+        {featured.length === 0 ? (
+          <div className="rounded-[28px] border border-dashed border-stone-300 bg-white/40 px-6 py-14 text-center text-sm text-stone-500">
+            Loading a few startups… or enter your interests above and hit{" "}
+            <span className="font-medium text-stone-700">Find startups</span>.
+          </div>
+        ) : (
+          <ul className="grid gap-4 sm:grid-cols-2">
+            {featured.map((startup) => (
+              <li key={startup.id}>
+                <StartupCard startup={startup} />
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     );
   }
