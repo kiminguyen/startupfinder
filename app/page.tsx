@@ -87,7 +87,7 @@ export default function Home() {
             </div>
 
             <div className="relative z-10">
-              <h1 className="mt-7 max-w-2xl text-4xl font-light leading-[1.1] tracking-tight text-stone-900 sm:text-5xl">
+              <h1 className="mt-7 text-4xl font-light leading-[1.1] tracking-tight text-stone-900 sm:whitespace-nowrap sm:text-5xl">
                 Find the startup that's right for you.
               </h1>
               <p className="mt-4 max-w-xl text-sm leading-relaxed text-stone-800/80">

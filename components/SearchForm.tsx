@@ -4,6 +4,7 @@ import { BACKERS, BACKER_IDS } from "@/lib/backers";
 import type { Backer, Facets, SearchFilters, Startup } from "@/lib/types";
 import { useCallback, useEffect, useState } from "react";
 import { Dropdown } from "./Dropdown";
+import { ResumeUpload } from "./ResumeUpload";
 import { StartupCard } from "./StartupCard";
 
 const EMPTY_FACETS: Facets = { roles: [], skills: [], industries: [] };
@@ -80,6 +81,20 @@ export function SearchForm({ onSearch, loading }: SearchFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
+      <ResumeUpload
+        onMatch={(m) => {
+          if (m.role) setRole(m.role);
+          if (m.skill) setSkill(m.skill);
+          if (m.industry) setIndustry(m.industry);
+        }}
+      />
+
+      <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.15em] text-stone-400">
+        <span className="h-px flex-1 bg-stone-200" />
+        <span className="font-mono">or set filters</span>
+        <span className="h-px flex-1 bg-stone-200" />
+      </div>
+
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <Dropdown
           label="Roles"
