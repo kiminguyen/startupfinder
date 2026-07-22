@@ -22,6 +22,8 @@ export default function Home() {
   const [searched, setSearched] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [today, setToday] = useState("");
+  const [hiringActive, setHiringActive] = useState(false);
+  const [roleQuery, setRoleQuery] = useState("");
 
   useEffect(() => {
     setToday(new Date().toLocaleDateString("en-US"));
@@ -31,6 +33,8 @@ export default function Home() {
     setLoading(true);
     setError(null);
     setSearched(true);
+    setHiringActive(filters.hiringOnly);
+    setRoleQuery(filters.roles[0] ?? filters.skills[0] ?? "");
 
     try {
       const params = filtersToParams(filters);
@@ -115,6 +119,8 @@ export default function Home() {
             total={total}
             loading={loading}
             searched={searched}
+            hiringActive={hiringActive}
+            roleQuery={roleQuery}
           />
         </div>
       </div>

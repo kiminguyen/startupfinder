@@ -174,9 +174,18 @@ interface ResultsProps {
   total: number;
   loading: boolean;
   searched: boolean;
+  hiringActive: boolean;
+  roleQuery: string;
 }
 
-export function Results({ startups, total, loading, searched }: ResultsProps) {
+export function Results({
+  startups,
+  total,
+  loading,
+  searched,
+  hiringActive,
+  roleQuery,
+}: ResultsProps) {
   if (loading) {
     return (
       <div className="py-16 text-center text-sm text-stone-500">
@@ -217,7 +226,11 @@ export function Results({ startups, total, loading, searched }: ResultsProps) {
       <ul className="grid gap-4 sm:grid-cols-2">
         {startups.map((startup) => (
           <li key={startup.id}>
-            <StartupCard startup={startup} />
+            <StartupCard
+              startup={startup}
+              showJobsLink={hiringActive}
+              roleQuery={roleQuery}
+            />
           </li>
         ))}
       </ul>

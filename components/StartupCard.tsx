@@ -22,7 +22,26 @@ function Detail({ label, value }: { label: string; value: string }) {
   );
 }
 
-export function StartupCard({ startup }: { startup: Startup }) {
+function titleCase(s: string): string {
+  return s.replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function jobsSearchUrl(name: string, roleQuery: string): string {
+  const keywords = [name, roleQuery].filter(Boolean).join(" ");
+  return `https://www.linkedin.com/jobs/search/?keywords=${encodeURIComponent(
+    keywords
+  )}`;
+}
+
+export function StartupCard({
+  startup,
+  showJobsLink = false,
+  roleQuery = "",
+}: {
+  startup: Startup;
+  showJobsLink?: boolean;
+  roleQuery?: string;
+}) {
   const website = startup.website
     ? startup.website.startsWith("http")
       ? startup.website
@@ -91,6 +110,27 @@ export function StartupCard({ startup }: { startup: Startup }) {
               </span>
             ))}
           </div>
+        )}
+
+        {showJobsLink && startup.isHiring && (
+          <a
+            href={jobsSearchUrl(startup.name, roleQuery)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-4 inline-flex items-center gap-1.5 self-start rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-700 transition hover:bg-emerald-100"
+          >
+            <svg viewBox="0 0 20 20" fill="none" className="size-3.5">
+              <path
+                d="M6 7V5.5A1.5 1.5 0 017.5 4h5A1.5 1.5 0 0114 5.5V7m2 0H4a1 1 0 00-1 1v6a1 1 0 001 1h12a1 1 0 001-1V8a1 1 0 00-1-1z"
+                stroke="currentColor"
+                strokeWidth="1.4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            {roleQuery ? `Find ${titleCase(roleQuery)} roles` : "See open roles"}
+            <span aria-hidden>→</span>
+          </a>
         )}
 
         <div className="mt-4 flex flex-wrap gap-4 border-t border-stone-200 pt-4">
