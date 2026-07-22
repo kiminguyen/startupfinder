@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 
 export function SparkleCursor() {
   const ref = useRef<HTMLDivElement>(null);
+  const trailRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Only on devices with a precise pointer (mouse / trackpad).
@@ -12,11 +13,38 @@ export function SparkleCursor() {
     const el = ref.current;
     if (!el) return;
     const root = document.documentElement;
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+    let lastEmit = 0;
+
+    // Spawn a small sparkle at (x, y) that falls and fades, then removes itself.
+    function emit(x: number, y: number) {
+      const trail = trailRef.current;
+      if (!trail) return;
+      const spark = document.createElement("span");
+      spark.className = "cursor-spark";
+      spark.style.left = `${x}px`;
+      spark.style.top = `${y}px`;
+      spark.style.setProperty("--dx", `${(Math.random() * 2 - 1) * 22}px`);
+      spark.style.setProperty("--dy", `${34 + Math.random() * 48}px`);
+      spark.style.setProperty("--rot", `${(Math.random() * 2 - 1) * 140}deg`);
+      spark.style.setProperty("--s", (0.55 + Math.random() * 0.7).toFixed(2));
+      trail.appendChild(spark);
+      window.setTimeout(() => spark.remove(), 1300);
+    }
 
     function move(e: MouseEvent) {
       root.classList.add("sparkle-active");
       el!.style.opacity = "1";
       el!.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+      if (!reduceMotion) {
+        const now = performance.now();
+        if (now - lastEmit > 70) {
+          lastEmit = now;
+          emit(e.clientX, e.clientY);
+        }
+      }
     }
     function hide() {
       el!.style.opacity = "0";
@@ -44,12 +72,18 @@ export function SparkleCursor() {
   }, []);
 
   return (
-    <div
-      ref={ref}
-      aria-hidden
-      className="pointer-events-none fixed left-0 top-0 z-[9999] opacity-0 will-change-transform"
-      style={{ transform: "translate(-100px, -100px)" }}
-    >
+    <>
+      <div
+        ref={trailRef}
+        aria-hidden
+        className="pointer-events-none fixed inset-0 z-[9998] overflow-hidden"
+      />
+      <div
+        ref={ref}
+        aria-hidden
+        className="pointer-events-none fixed left-0 top-0 z-[9999] opacity-0 will-change-transform"
+        style={{ transform: "translate(-100px, -100px)" }}
+      >
       <div className="sparkle-cursor relative -translate-x-1/2 -translate-y-1/2">
         <span className="sparkle-aura" />
         <svg
@@ -72,6 +106,7 @@ export function SparkleCursor() {
           </defs>
         </svg>
       </div>
-    </div>
+      </div>
+    </>
   );
 }
