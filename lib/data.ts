@@ -1,4 +1,4 @@
-import type { A16zCompany, Startup, YCCompany } from "./types";
+import type { A16zCompany, Backer, Startup, YCCompany } from "./types";
 
 const YC_API = "https://yc-oss.github.io/api/companies/all.json";
 const A16Z_PORTFOLIO = "https://a16z.com/portfolio/";
@@ -310,18 +310,54 @@ export async function fetchStartups(): Promise<Startup[]> {
     throw new Error("All startup sources failed");
   }
 
-  const startups = mergeStartups(lists).sort((a, b) => {
-    // Newest round/batch year first; companies with no known year sort last.
-    const yearA = a.roundYear ?? -Infinity;
-    const yearB = b.roundYear ?? -Infinity;
-    if (yearA !== yearB) return yearB - yearA;
-
-    // Within a year: multi-firm-backed first, then hiring, then name.
-    const score = (s: Startup) => s.backers.length * 2 + (s.isHiring ? 1 : 0);
-    const diff = score(b) - score(a);
-    return diff !== 0 ? diff : a.name.localeCompare(b.name);
-  });
+  const startups = interleaveByFirm(mergeStartups(lists));
 
   cache = { startups, fetchedAt: Date.now() };
   return startups;
+}
+
+// Newest round/batch year first; no known year sorts last. Ties break on
+// multi-firm-backed, then hiring, then name.
+function byNewest(a: Startup, b: Startup): number {
+  const yearA = a.roundYear ?? -Infinity;
+  const yearB = b.roundYear ?? -Infinity;
+  if (yearA !== yearB) return yearB - yearA;
+
+  const score = (s: Startup) => s.backers.length * 2 + (s.isHiring ? 1 : 0);
+  const diff = score(b) - score(a);
+  return diff !== 0 ? diff : a.name.localeCompare(b.name);
+}
+
+/**
+ * YC publishes current batches while the other firms' date signals are older
+ * (or missing), so a straight newest-first sort buries every non-YC company.
+ * Instead, bucket companies by firm — favouring the smaller sources so
+ * co-backed companies keep them visible — sort each bucket newest-first, then
+ * round-robin across buckets. Any page of results shows a mix of all four.
+ */
+function interleaveByFirm(startups: Startup[]): Startup[] {
+  const order: Backer[] = ["yc", "a16z", "usv", "bessemer"];
+  // Smallest sources first, so a YC+USV company counts toward USV.
+  const assignPriority: Backer[] = ["usv", "bessemer", "a16z", "yc"];
+
+  const buckets = new Map<Backer, Startup[]>(order.map((b) => [b, []]));
+  for (const s of startups) {
+    const primary = assignPriority.find((b) => s.backers.includes(b)) ?? "yc";
+    buckets.get(primary)!.push(s);
+  }
+  for (const list of buckets.values()) list.sort(byNewest);
+
+  const out: Startup[] = [];
+  for (let i = 0; ; i++) {
+    let addedAny = false;
+    for (const firm of order) {
+      const list = buckets.get(firm)!;
+      if (i < list.length) {
+        out.push(list[i]);
+        addedAny = true;
+      }
+    }
+    if (!addedAny) break;
+  }
+  return out;
 }
