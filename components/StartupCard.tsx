@@ -27,11 +27,17 @@ function titleCase(s: string): string {
   return s.replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-// We don't store each company's exact careers URL (they vary wildly — own
-// domain, subdomain, or an ATS like Greenhouse/Lever). A scoped Google search
-// reliably lands on the company's own careers/jobs page as the top result.
-function careersSearchUrl(name: string, roleQuery: string): string {
-  const query = [name, "careers", roleQuery].filter(Boolean).join(" ");
+function careersUrl(startup: Startup, roleQuery: string): string {
+  // YC publishes a real per-company jobs page listing that company's actual
+  // open roles, so link straight to it.
+  if (startup.ycUrl) {
+    return `${startup.ycUrl.replace(/\/+$/, "")}/jobs`;
+  }
+  // The other firms don't expose a careers URL, and company careers pages live
+  // anywhere (own domain, subdomain, or an ATS like Greenhouse/Lever), so a
+  // guessed path would often 404. A company-scoped search reliably lands on
+  // their real careers page instead.
+  const query = [startup.name, "careers", roleQuery].filter(Boolean).join(" ");
   return `https://www.google.com/search?q=${encodeURIComponent(query)}`;
 }
 
@@ -118,7 +124,7 @@ export function StartupCard({
 
         {showJobsLink && startup.isHiring && (
           <a
-            href={careersSearchUrl(startup.name, roleQuery)}
+            href={careersUrl(startup, roleQuery)}
             target="_blank"
             rel="noopener noreferrer"
             className="mt-4 inline-flex items-center gap-1.5 self-start rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-700 transition hover:bg-emerald-100"
