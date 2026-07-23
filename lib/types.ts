@@ -24,6 +24,7 @@ export interface SearchFilters {
   roles: string[];
   skills: string[];
   industries: string[];
+  years: number[];
   backers: Backer[];
   hiringOnly: boolean;
 }
@@ -37,6 +38,7 @@ export interface Facets {
   roles: FacetOption[];
   skills: FacetOption[];
   industries: FacetOption[];
+  years: FacetOption[];
 }
 
 export interface YCCompany {

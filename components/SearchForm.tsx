@@ -4,11 +4,17 @@ import { BACKERS, BACKER_IDS } from "@/lib/backers";
 import type { Backer, Facets, SearchFilters, Startup } from "@/lib/types";
 import { useCallback, useEffect, useState } from "react";
 import { Dropdown } from "./Dropdown";
+import { MultiDropdown } from "./MultiDropdown";
 import { Tooltip } from "./Tooltip";
 import { ResumeUpload } from "./ResumeUpload";
 import { StartupCard } from "./StartupCard";
 
-const EMPTY_FACETS: Facets = { roles: [], skills: [], industries: [] };
+const EMPTY_FACETS: Facets = {
+  roles: [],
+  skills: [],
+  industries: [],
+  years: [],
+};
 
 interface SearchFormProps {
   onSearch: (filters: SearchFilters) => void;
@@ -19,6 +25,7 @@ function buildParams(
   role: string,
   skill: string,
   industry: string,
+  years: string[],
   backers: Backer[],
   hiringOnly: boolean
 ): URLSearchParams {
@@ -26,6 +33,7 @@ function buildParams(
   if (role) params.set("roles", role.toLowerCase());
   if (skill) params.set("skills", skill.toLowerCase());
   if (industry) params.set("industries", industry.toLowerCase());
+  if (years.length) params.set("years", years.join(","));
   if (hiringOnly) params.set("hiring", "true");
   params.set("backers", (backers.length ? backers : BACKER_IDS).join(","));
   return params;
@@ -35,11 +43,13 @@ export function SearchForm({ onSearch, loading }: SearchFormProps) {
   const [role, setRole] = useState("");
   const [skill, setSkill] = useState("");
   const [industry, setIndustry] = useState("");
+  const [years, setYears] = useState<string[]>([]);
   const [backers, setBackers] = useState<Backer[]>(BACKER_IDS);
   const [hiringOnly, setHiringOnly] = useState(false);
   const [facets, setFacets] = useState<Facets>(EMPTY_FACETS);
 
   const backersKey = backers.join(",");
+  const yearsKey = years.join(",");
 
   function toggleBacker(id: Backer, checked: boolean) {
     setBackers((prev) =>
@@ -51,7 +61,7 @@ export function SearchForm({ onSearch, loading }: SearchFormProps) {
   // dropdown only ever offers choices that would return results.
   useEffect(() => {
     let cancelled = false;
-    const params = buildParams(role, skill, industry, backers, hiringOnly);
+    const params = buildParams(role, skill, industry, years, backers, hiringOnly);
     fetch(`/api/facets?${params.toString()}`)
       .then((res) => (res.ok ? res.json() : EMPTY_FACETS))
       .then((data: Facets) => {
@@ -64,7 +74,7 @@ export function SearchForm({ onSearch, loading }: SearchFormProps) {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [role, skill, industry, backersKey, hiringOnly]);
+  }, [role, skill, industry, yearsKey, backersKey, hiringOnly]);
 
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
@@ -73,11 +83,12 @@ export function SearchForm({ onSearch, loading }: SearchFormProps) {
         roles: role ? [role.toLowerCase()] : [],
         skills: skill ? [skill.toLowerCase()] : [],
         industries: industry ? [industry.toLowerCase()] : [],
+        years: years.map(Number),
         backers: backers.length > 0 ? backers : BACKER_IDS,
         hiringOnly,
       });
     },
-    [role, skill, industry, backers, hiringOnly, onSearch]
+    [role, skill, industry, years, backers, hiringOnly, onSearch]
   );
 
   return (
@@ -96,7 +107,7 @@ export function SearchForm({ onSearch, loading }: SearchFormProps) {
         <span className="h-px flex-1 bg-stone-200" />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2">
         <Dropdown
           label="Roles"
           placeholder="Any role — type or pick"
@@ -117,6 +128,13 @@ export function SearchForm({ onSearch, loading }: SearchFormProps) {
           options={facets.industries}
           value={industry}
           onChange={setIndustry}
+        />
+        <MultiDropdown
+          label="Year"
+          placeholder="Any year — select one or more"
+          options={facets.years}
+          selected={years}
+          onChange={setYears}
         />
       </div>
 

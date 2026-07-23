@@ -30,10 +30,16 @@ export function parseSearchParams(params: URLSearchParams): SearchFilters {
     .map((b) => b.trim())
     .filter(isBacker);
 
+  const years = (params.get("years") ?? "")
+    .split(",")
+    .map((y) => Number(y.trim()))
+    .filter((y) => Number.isInteger(y) && y > 0);
+
   return {
     roles: parseList(params.get("roles")),
     skills: parseList(params.get("skills")),
     industries: parseList(params.get("industries")),
+    years,
     backers: backers.length > 0 ? backers : BACKER_IDS,
     hiringOnly: params.get("hiring") === "true",
   };
@@ -73,6 +79,11 @@ export function filterStartups(
       if (!hasBacker) return false;
     }
 
+    if (filters.years.length > 0) {
+      if (startup.roundYear == null || !filters.years.includes(startup.roundYear))
+        return false;
+    }
+
     const text = searchableText(startup);
 
     if (!matchesTerms(text, roleTerms)) return false;
@@ -95,6 +106,7 @@ export function computeFacets(
   const forRoles = filterStartups(startups, { ...filters, roles: [] });
   const forSkills = filterStartups(startups, { ...filters, skills: [] });
   const forIndustries = filterStartups(startups, { ...filters, industries: [] });
+  const forYears = filterStartups(startups, { ...filters, years: [] });
 
   return {
     roles: rankRoleOptions(forRoles),
@@ -104,7 +116,20 @@ export function computeFacets(
       (s) => (s.industry ? [s.industry] : []),
       60
     ),
+    years: rankYears(forYears),
   };
+}
+
+// Distinct round/batch years with counts, most recent first.
+function rankYears(startups: Startup[]): FacetOption[] {
+  const counts = new Map<number, number>();
+  for (const s of startups) {
+    if (s.roundYear) counts.set(s.roundYear, (counts.get(s.roundYear) ?? 0) + 1);
+  }
+  return [...counts.entries()]
+    .sort((a, b) => b[0] - a[0])
+    .slice(0, 30)
+    .map(([year, count]) => ({ value: String(year), count }));
 }
 
 // Count how many startups each curated role would match (via its keyword map),

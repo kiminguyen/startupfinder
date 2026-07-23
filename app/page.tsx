@@ -10,6 +10,7 @@ function filtersToParams(filters: SearchFilters): URLSearchParams {
   if (filters.skills.length) params.set("skills", filters.skills.join(","));
   if (filters.industries.length)
     params.set("industries", filters.industries.join(","));
+  if (filters.years.length) params.set("years", filters.years.join(","));
   if (filters.hiringOnly) params.set("hiring", "true");
   params.set("backers", filters.backers.join(","));
   return params;
